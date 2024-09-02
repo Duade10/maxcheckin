@@ -9,7 +9,7 @@ def get_google_sheet_client():
     ]
 
     credentials = Credentials.from_service_account_file(
-        '../keys.json',
+        'keys.json',
         scopes=scopes
     )
 

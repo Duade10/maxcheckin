@@ -10,6 +10,7 @@ from google.oauth2.service_account import Credentials
 from gspread.exceptions import APIError
 from openpyxl import Workbook
 from openpyxl.styles import Font
+from utils import data_processing
 
 
 # Function to get Google Sheets client
@@ -111,9 +112,9 @@ def main():
         json_key = json.load(file)
 
     sheet_id = st.text_input("Enter the Google Sheet ID")
-
+    sheet_id = data_processing.extract_google_sheet_id(sheet_id)
     start_day = st.number_input("Start Day", min_value=1, max_value=31, value=1)
-    end_day = st.number_input("End Day", min_value=start_day, max_value=31, value=6)
+    end_day = st.number_input("End Day", min_value=start_day, max_value=31, value=31)
 
     if st.button("Analyze Data"):
         try:

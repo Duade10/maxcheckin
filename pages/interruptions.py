@@ -11,6 +11,7 @@ def main():
     st.title("Google Sheet Data Processor")
 
     sheet_id = st.text_input("Enter Google Sheet ID")
+    sheet_id = data_processing.extract_google_sheet_id(sheet_id)
     worksheet = st.text_input("Enter Worksheet Name")
 
     if st.button("Process Sheet"):
