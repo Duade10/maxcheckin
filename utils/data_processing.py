@@ -1,4 +1,72 @@
 from datetime import datetime
+import re
+
+
+def make_excel_correction_substation(substation: str) -> str:
+    """
+    Make a correction to the given data by replacing it with a predefined value.
+
+    Parameters:
+        data (str): The data to be corrected.
+
+    Returns:
+        str: The corrected data.
+
+    Description:
+        This function takes a string `data` as input and checks if it matches any of the keys in the `corrections` dictionary.
+        If a match is found, the corresponding value is returned. Otherwise, the original `data` is returned.
+
+        The `corrections` dictionary contains key-value pairs where the keys are the original values and the values are the corrected values.
+
+        Example usage:
+        ```
+        corrected_data = make_excel_correction_substation('oshogbo')
+        print(corrected_data)  # Output: 'OSOGBO'
+        ```
+        :param substation:
+    """
+    corrections = {
+        'oshogbo': 'OSOGBO',
+        'ilesha': 'ILESA',
+        'ado ekiti': 'ADO',
+    }
+
+    return corrections.get(substation.lower(), substation)
+
+
+def make_excel_correction_132(data: str):
+    """
+    Make a correction to the given data by replacing it with a predefined value.
+
+    Parameters:
+        data (str): The data to be corrected.
+
+    Returns:
+        str: The corrected data.
+
+    Description:
+        This function takes a string `data` as input and checks if it matches any of the keys in the `corrections` dictionary.
+        If a match is found, the corresponding value is returned. Otherwise, the original `data` is returned.
+
+        The `corrections` dictionary contains key-value pairs where the keys are the original values and the values are the corrected values.
+
+        Example usage:
+        ```
+        corrected_data = make_excel_correction_132('EDE WATER')
+        print(corrected_data)  # Output: 'WWKS EDE'
+        ```
+    """
+    corrections = {
+        'EDE WATER': 'WWKS EDE',
+        'OSOGBO/IKIRUN': 'OSOGBO/ IKIRUN',
+        'STEEL ROLLING MILL': 'SRM',
+        'NIGERIA MACHINE TOOLS': 'NMT',
+        'POWER LINE': 'POWERLINE',
+        'IBOKUN': 'IBOKUN',
+        'IPETU-IJESA': 'IPETU-JESA'
+    }
+
+    return corrections.get(data, data)
 
 
 def calculate_time_difference(start_date_str, start_time_str, end_date_str, end_time_str):
@@ -12,22 +80,33 @@ def calculate_time_difference(start_date_str, start_time_str, end_date_str, end_
     return time_difference
 
 
-def get_correct_fault(fault):
-    result = None
-    fault = str(fault).lower()
-    if fault == 'inst oc (disco)':
-        result = 'INST OC'
-    elif fault == 'ef (disco)':
-        result = 'E/F'
-    elif fault == 'oc (disco)':
-        result = 'O/C'
-    elif fault == 'inst oc/ef (disco)':
-        result = 'INST OC/EF'
-    elif fault == 'oc/ef (disco)':
-        result = 'OC/EF'
-    elif fault == 'inst ef (disco)':
-        result = 'INST E/F'
-    return result
+def get_correct_fault(fault) -> str | None:
+    """
+    Returns the correct fault code based on the given fault string.
+
+    Parameters:
+        fault (str): The fault string to be checked.
+
+    Returns:
+        str or None: The corresponding correct fault code if found, otherwise None.
+    """
+    fault_dict = {
+        'inst oc (disco)': 'INST OC',
+        'ef (disco)': 'E/F',
+        'oc (disco)': 'O/C',
+        'inst oc/ef (disco)': 'INST OC/EF',
+        'oc/ef (disco)': 'OC/EF',
+        'inst ef (disco)': 'INST E/F'
+    }
+    return fault_dict.get(str(fault).lower(), None)
+
+
+def format_remarks(remarks: str) -> str:
+    remarks_dict = {
+        'TRIAL RECLOSURE': 'A TRIAL RECLOSURE WAS MADE AND STAYED',
+    }
+
+    return remarks_dict.setdefault(remarks.upper(), remarks.upper())
 
 
 def is_contain_value(value):
@@ -45,13 +124,18 @@ def join_time(time1, time2):
 
 
 def format_substation_name(substation: str) -> str:
-    substation = substation.lower()
-    if '132kv' in substation:
-        result = substation.replace("132kv", "")
-    else:
-        result = substation
-    result = make_excel_correction_substation(result)
-    return f"{result.upper()} T.S"
+    """
+    Format the substation name by removing '132kv' if present and converting to uppercase.
+
+    Args:
+        substation (str): The substation name to be formatted.
+
+    Returns:
+        str: The formatted substation name.
+    """
+    result = make_excel_correction_132(substation.lower().replace('132kv', '').upper())
+
+    return result
 
 
 def format_subregion_name(subregion: str) -> str:
@@ -85,14 +169,9 @@ def make_excel_correction(data: str):
     return data
 
 
-def make_excel_correction_substation(substation: str) -> str:
-    data = str(substation).upper()
-    print(data)
-    if 'OSHOGBO' in data:
-        substation = 'OSOGBO'
-        print(substation)
-    elif 'ILESHA' in data:
-        substation = 'ILESA'
-    elif 'ADO EKITI' in data:
-        substation = 'ADO'
-    return substation
+def extract_google_sheet_id(url):
+    pattern = r'^https?://docs\.google\.com/spreadsheets/d/([a-zA-Z0-9-_]+)'
+    match = re.search(pattern, url)
+    if match:
+        return match.group(1)
+    return None
